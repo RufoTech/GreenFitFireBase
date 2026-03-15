@@ -1,22 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import { MaterialIcons } from '@expo/vector-icons';
+import auth from '@react-native-firebase/auth';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Image,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
-  View,
-  SafeAreaView,
-  StatusBar,
   TouchableOpacity,
-  ScrollView,
-  Platform,
-  Image,
-  Dimensions,
-  ActivityIndicator,
-  Alert
+  View
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import auth from '@react-native-firebase/auth';
 
 const { width } = Dimensions.get('window');
 
@@ -77,6 +77,7 @@ export default function WeeklyProgramScreen() {
         }
 
         const data = await response.json();
+        console.log("Program Data Received:", JSON.stringify(data, null, 2));
         setProgramData(data);
     } catch (error) {
         console.error("Error fetching program weeks:", error);
@@ -97,6 +98,13 @@ export default function WeeklyProgramScreen() {
           let duration = 0;
           let exercises = 0;
 
+          // DEBUG LOG - Her bir item için image kontrolü
+          console.log(`Processing Day ${item.day} (${item.title}):`, {
+              hasImages: !!item.images,
+              imagesArray: item.images,
+              firstImage: item.images && item.images.length > 0 ? item.images[0] : "NONE"
+          });
+
           if (item.subtitle) {
               const parts = item.subtitle.split('•');
               if (parts.length > 0) {
@@ -111,13 +119,22 @@ export default function WeeklyProgramScreen() {
               }
           }
 
+          // Gelen resim URL'sini temizle (Backtick, tırnak ve boşlukları kaldır)
+          let imageUrl = null;
+          if (item.images && item.images.length > 0) {
+              const rawUrl = item.images[0];
+              if (typeof rawUrl === 'string') {
+                  imageUrl = rawUrl.replace(/[`"'\s]/g, '');
+              }
+          }
+
           return {
               day: item.day,
               title: item.title,
               type: item.type || 'workout',
               duration: duration,
               exercises: exercises,
-              image: item.images && item.images.length > 0 ? item.images[0] : null,
+              image: imageUrl,
               focus: item.title, // Title-ı focus kimi istifadə edirik hələlik
               isCurrent: false, // Bunu real tarixə görə hesablamaq olar
               note: item.subtitle // Rest day üçün
@@ -209,7 +226,11 @@ export default function WeeklyProgramScreen() {
 
                                 {item.image && (
                                     <View style={styles.heroImageContainer}>
-                                        <Image source={{ uri: item.image }} style={styles.heroImage} />
+                                        <Image 
+                                            source={{ uri: item.image }} 
+                                            style={styles.heroImage} 
+                                            onError={(e) => console.log("Image load error:", e.nativeEvent.error)}
+                                        />
                                         <LinearGradient
                                             colors={['transparent', 'rgba(0,0,0,0.8)']}
                                             style={styles.imageOverlay}
@@ -257,11 +278,20 @@ export default function WeeklyProgramScreen() {
                                         <Text style={styles.metaText}>{item.duration} min • {item.exercises} exercises</Text>
                                     </View>
                                 </View>
-                                <MaterialIcons 
-                                    name="fitness-center"
-                                    size={24} 
-                                    color={SUBTEXT_COLOR} 
-                                />
+                                {item.image ? (
+                                    <Image 
+                                        source={{ uri: item.image }} 
+                                        style={{ width: 60, height: 60, borderRadius: 8, marginLeft: 12 }} 
+                                        resizeMode="cover"
+                                        onError={(e) => console.log("Thumbnail error:", e.nativeEvent.error)}
+                                    />
+                                ) : (
+                                    <MaterialIcons 
+                                        name="fitness-center"
+                                        size={24} 
+                                        color={SUBTEXT_COLOR} 
+                                    />
+                                )}
                             </View>
                         </View>
                     );

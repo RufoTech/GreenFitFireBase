@@ -132,6 +132,25 @@ func getProgramWeeksHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// ----------------------------------------------------------------------
+	for weekKey, weekItems := range data.Weeks {
+		for i, item := range weekItems {
+			if len(item.Images) > 0 {
+				var cleanImages []string
+				for _, img := range item.Images {
+					// Backtick (`), tek tırnak ('), çift tırnak (") ve boşlukları temizle
+					cleanImg := strings.Trim(img, " `\"'")
+					if cleanImg != "" {
+						cleanImages = append(cleanImages, cleanImg)
+					}
+				}
+				// Temizlenmiş listeyi geri ata
+				data.Weeks[weekKey][i].Images = cleanImages
+			}
+		}
+	}
+	// ----------------------------------------------------------------------
+
 	// JSON olaraq qaytarırıq
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(data); err != nil {

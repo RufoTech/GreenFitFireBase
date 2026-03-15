@@ -1,26 +1,26 @@
-import React, { useState, useCallback } from 'react';
+import { MaterialIcons } from '@expo/vector-icons';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useCallback, useState } from 'react';
 import {
-  StyleSheet,
-  Text,
-  View,
-  SafeAreaView,
-  StatusBar,
-  TouchableOpacity,
-  ScrollView,
-  Platform,
-  TextInput,
-  ImageBackground,
-  Dimensions,
   ActivityIndicator,
   Alert,
+  Dimensions,
+  Image,
+  ImageBackground,
   Modal,
-  Image
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter, useFocusEffect } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import firestore from '@react-native-firebase/firestore';
-import auth from '@react-native-firebase/auth';
 
 const { width } = Dimensions.get('window');
 
@@ -79,7 +79,8 @@ export default function MonthlyWorkoutLibraryScreen() {
                   if (Array.isArray(week)) {
                     for (const day of week) {
                       const img = day?.images?.[0];
-                      if (day?.type === 'workout' && img && img !== 'https://via.placeholder.com/300') {
+                      // Daha esnek resim kontrolü
+                      if (img && typeof img === 'string' && img.length > 5) {
                         programImage = img;
                         break;
                       }
