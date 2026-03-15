@@ -206,12 +206,14 @@ export default function WeeklyProgramScreen() {
             <View style={styles.daysList}>
                 {weekSchedule.map((item) => {
                     
-                    if (item.isCurrent && item.type !== 'rest') {
+                    if (item.type !== 'rest') {
                         return (
-                            <View key={item.day} style={styles.currentDayCard}>
+                            <View key={item.day} style={item.isCurrent ? styles.currentDayCard : styles.dayCard}>
                                 <View style={styles.currentDayHeader}>
                                     <View style={styles.dayInfo}>
-                                        <Text style={styles.currentDayLabel}>CURRENT DAY</Text>
+                                        {item.isCurrent && (
+                                            <Text style={styles.currentDayLabel}>CURRENT DAY</Text>
+                                        )}
                                         <Text style={styles.dayTitle}>Day {item.day}: {item.title}</Text>
                                         <View style={styles.dayMeta}>
                                             <MaterialIcons name="schedule" size={12} color={isDarkMode ? TEXT_MUTED_DARK : TEXT_MUTED_LIGHT} />
@@ -221,8 +223,12 @@ export default function WeeklyProgramScreen() {
                                             <Text style={styles.metaText}>{item.exercises} exercises</Text>
                                         </View>
                                     </View>
-                                    <View style={styles.boltIconContainer}>
-                                        <MaterialIcons name="bolt" size={24} color={PRIMARY} />
+                                    <View style={item.isCurrent ? styles.boltIconContainer : {}}>
+                                        {item.isCurrent ? (
+                                            <MaterialIcons name="bolt" size={24} color={PRIMARY} />
+                                        ) : (
+                                            <MaterialIcons name="fitness-center" size={24} color={isDarkMode ? TEXT_MUTED_DARK : TEXT_MUTED_LIGHT} />
+                                        )}
                                     </View>
                                 </View>
 
@@ -270,24 +276,7 @@ export default function WeeklyProgramScreen() {
                         );
                     }
 
-                    return (
-                        <View key={item.day} style={styles.dayCard}>
-                            <View style={styles.dayCardContent}>
-                                <View style={styles.dayInfo}>
-                                    <Text style={styles.dayTitle}>Day {item.day}: {item.title}</Text>
-                                    <View style={styles.dayMeta}>
-                                        <MaterialIcons name="schedule" size={14} color={isDarkMode ? TEXT_MUTED_DARK : TEXT_MUTED_LIGHT} />
-                                        <Text style={styles.metaText}>{item.duration} min • {item.exercises} exercises</Text>
-                                    </View>
-                                </View>
-                                <MaterialIcons 
-                                    name="fitness-center"
-                                    size={24} 
-                                    color={isDarkMode ? TEXT_MUTED_DARK : TEXT_MUTED_LIGHT} 
-                                />
-                            </View>
-                        </View>
-                    );
+                    return null;
                 })}
             </View>
         )}
@@ -297,6 +286,24 @@ export default function WeeklyProgramScreen() {
     </SafeAreaView>
   );
 }
+                        return (
+                            <View key={item.day} style={styles.restDayCard}>
+                                <View style={styles.restDayContent}>
+                                    <View style={styles.dayInfo}>
+                                        <Text style={styles.dayTitle}>Day {item.day}: {item.title}</Text>
+                                        <Text style={styles.restNote}>{item.note || "Rest & Recover"}</Text>
+                                    </View>
+                                    <MaterialIcons 
+                                        name="self-improvement"
+                                        size={24} 
+                                        color="rgba(204, 255, 0, 0.6)" 
+                                    />
+                                </View>
+                            </View>
+                        );
+                    }
+
+                    if (item.type === 'rest') {
 
 const styles = StyleSheet.create({
   container: {
